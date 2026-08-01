@@ -1,63 +1,120 @@
-# 手势控制 3D 粒子系统
+[English](README.md) | [简体中文](README_CN.md)
 
-这是一个完全使用原生 HTML、CSS、JavaScript 制作的实时 3D 粒子页面。它通过 Three.js 渲染粒子，并用 MediaPipe Hands 识别一只手的 21 个关键点。
+# Gesture-Controlled 3D Particle System
 
-## 如何启动
+An interactive browser-based particle experience that combines real-time 3D rendering with hand tracking. Three.js renders the particle scene, while MediaPipe Hands detects one hand through the webcam and maps palm gestures and movement to the animation.
 
-1. 在 VS Code 中打开本文件夹。
-2. 在资源管理器中右键 `index.html`。
-3. 选择 **Open with Live Server**。
-4. 页面应以 `http://localhost:...` 或 `http://127.0.0.1:...` 地址打开。
+The project uses plain web technologies, requires no package installation or API key, and runs locally through a development server.
 
-请勿直接双击 `index.html`。`file://` 页面不能正常、安全地申请摄像头权限，页面也会明确提示必须使用 Live Server。
+## Features
 
-## 第一次使用摄像头
+- Real-time 3D particles with a glowing background star field
+- Single-hand tracking through the webcam
+- Open- and closed-palm gestures that expand and gather the particles
+- Horizontal and vertical palm movement that rotates the particle form
+- Four particle presets with smooth transitions
+- Base color and particle density controls
+- Mirrored, resizable camera preview
+- Fullscreen mode with automatic button-state synchronization
+- Slow automatic rotation when no hand is detected
 
-第一次打开时，浏览器地址栏附近会弹出摄像头权限请求。请选择 **允许**。授权成功后，左下角会显示镜像摄像头画面；把一只手完整放进画面即可开始控制。
+## Technology Stack
 
-- 张开手掌：超过展开阈值后，粒子自动沿各自的爆发方向完全散开。
-- 握紧手掌：低于收拢阈值后，粒子自动完全聚拢并恢复完整形态。
-- 半开手掌：保持上一次展开或收拢状态，不会停在半展开位置。
-- 左右移动：根据相邻识别帧的实际位移累计旋转，单次横移可达到约 360°；手停止后旋转也停止。
-- 上下移动：控制 X 轴旋转。
-- 没有检测到手：粒子保持缓慢自动旋转。
+- HTML
+- CSS
+- JavaScript
+- Three.js `0.160.0`
+- MediaPipe Hands `0.4.1675469240`
 
-如果误点了拒绝，请点击浏览器地址栏左侧的站点权限图标，把摄像头改为“允许”，然后点击页面上的 **重新尝试摄像头**。
+Three.js and MediaPipe Hands are loaded from jsDelivr, so an internet connection is required when the page loads.
 
-## 页面功能
+## Run Locally
 
-- 四种真实粒子坐标预设：星云、烟花、土星、花朵，切换时平滑变形。
-- 基础颜色选择器；颜色还会随旋转角度连续偏移。
-- 3,000～6,000 粒的密度控制，默认 3,500 粒；重建几何体时会释放旧资源。
-- 可进入/退出全屏，按 Esc 后按钮状态自动同步。
-- 左下角镜像摄像头小窗，可拖动顶部、右侧或右上角调节尺寸。
+1. Open the project folder in VS Code.
+2. Install the **Live Server** extension in VS Code.
+3. In the Explorer panel, right-click `index.html`.
+4. Select **Open with Live Server**.
+5. When the page opens in your browser, allow camera access.
 
-## 常见问题
+The page should open at an address beginning with `http://localhost` or `http://127.0.0.1`.
 
-### 页面空白
+> Do not double-click `index.html` or open it directly with a `file://` URL. The application requires a secure local context to request camera access and will display an error when opened this way.
 
-1. 确认地址以 `http://localhost` 或 `http://127.0.0.1` 开头，而不是 `file://`。
-2. 按 `Ctrl + F5` 强制刷新。
-3. 打开浏览器开发者工具（`F12`）查看 Network/网络面板，确认 `style.css`、`main.js` 返回 200。
-4. 尝试暂时关闭会阻止 WebGL 或脚本的浏览器扩展，并确认浏览器已启用硬件加速。
+## Camera Permission
 
-### 摄像头被拒绝或没有画面
+The application requests video access only; it does not request microphone access. After permission is granted, a mirrored camera preview appears in the lower-left corner. Place one hand fully inside the frame to begin controlling the particles.
 
-1. 点击地址栏左侧的权限图标，允许当前 localhost 站点使用摄像头。
-2. 关闭正在独占摄像头的会议或录屏软件。
-3. 点击页面中的 **重新尝试摄像头**。
-4. 如仍失败，请在 Windows“设置 → 隐私和安全性 → 摄像头”中允许桌面应用访问摄像头。
+If you previously denied access, open the site permissions from the icon beside the browser address bar, change the camera permission to **Allow**, and then select **Retry camera** on the page.
 
-### CDN 或模型加载失败
+The camera preview can be resized by dragging its top edge, right edge, or upper-right corner.
 
-Three.js 与 MediaPipe Hands 从 jsDelivr 加载，首次运行必须联网。如果页面显示 CDN/模型加载失败：
+## Gesture Controls
 
-1. 检查网络连接并刷新页面。
-2. 确认安全软件或代理没有拦截 `cdn.jsdelivr.net`。
-3. 按 `Ctrl + F5` 清除本页缓存并重新加载。
+| Gesture or movement | Result |
+| --- | --- |
+| Open your palm | The particles spread outward completely. |
+| Close your hand | The particles gather and return to the selected form. |
+| Hold your hand partly open | The system keeps the previous open or closed state to avoid unstable transitions. |
+| Move your palm left or right | Rotates the particle form around the Y axis. Rotation follows movement and stops when your hand stops. |
+| Move your palm up or down | Tilts the particle form around the X axis. |
+| Move your hand out of view | Returns the scene to slow automatic rotation. |
 
-项目固定使用 Three.js `0.160.0`，MediaPipe Hands 脚本和 `locateFile` 模型资源统一使用 `0.4.1675469240`。
+The tracker processes one hand and uses its detected landmarks to estimate palm openness and movement.
 
-## 浏览器建议
+## Particle Presets
 
-主要支持最新版 Google Chrome 和 Microsoft Edge。页面限制渲染像素比并控制默认粒子数量，适合普通笔记本运行。
+Use the control panel to switch among four generated particle arrangements:
+
+- **Nebula** — a five-arm spiral cloud
+- **Fireworks** — multiple spherical bursts and streaks
+- **Saturn** — a particle planet surrounded by rings
+- **Flower** — a seven-petal layered form
+
+Changing presets smoothly morphs the existing particles into the new arrangement.
+
+## Color and Particle Density
+
+- **Base color:** Use the color picker to set the starting hue. The displayed color also shifts gradually with the model's rotation and animation time.
+- **Particle density:** Use the slider to choose from 3,000 to 6,000 particles in steps of 500. The default is 3,500 particles.
+
+Changing the density rebuilds the particle geometry for the currently selected preset.
+
+## Fullscreen
+
+Select the fullscreen button in the lower-right corner to enter or leave fullscreen mode. You can also press `Esc` to exit; the button label updates automatically when fullscreen state changes.
+
+## Project Structure
+
+```text
+hand-particle/
+├── index.html      # Page structure, controls, and CDN script loading
+├── main.js         # Three.js scene, particles, hand tracking, and interactions
+├── style.css       # Layout, visual design, and responsive styles
+├── README.md       # English documentation
+└── README_CN.md    # Simplified Chinese documentation
+```
+
+## Frequently Asked Questions
+
+### Why is the page blank or the 3D scene missing?
+
+- Confirm that the URL begins with `http://localhost` or `http://127.0.0.1`, not `file://`.
+- Press `Ctrl + F5` to reload without the browser cache.
+- Open the browser developer tools with `F12` and confirm in the Network panel that `style.css` and `main.js` load successfully.
+- Make sure hardware acceleration is enabled, and temporarily disable browser extensions that may block WebGL or scripts.
+
+### Why was camera access denied or why is there no video?
+
+- Allow camera access for the current local site from the browser's site-permission controls.
+- Close meeting, recording, or other software that may be using the camera exclusively.
+- Select **Retry camera** on the page.
+- On Windows, check **Settings > Privacy & security > Camera** and allow desktop applications to access the camera.
+- For best compatibility, use a current version of Google Chrome or Microsoft Edge.
+
+### Why did Three.js, MediaPipe, or the hand model fail to load?
+
+The required scripts and MediaPipe model files are downloaded from `cdn.jsdelivr.net`. Check your internet connection, confirm that security software or a proxy is not blocking that domain, and reload the page with `Ctrl + F5`.
+
+### Why do the particles rotate automatically?
+
+Automatic rotation is the expected fallback when no hand has been detected recently. Move one hand fully into the camera frame to resume gesture control.
