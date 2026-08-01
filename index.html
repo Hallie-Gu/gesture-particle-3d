@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#050713" />
+    <title>手势控制 3D 粒子系统</title>
+    <script>
+      window.reportCriticalLoadError = function (message) {
+        window.__criticalLoadError = message;
+        document.addEventListener("DOMContentLoaded", function () {
+          var status = document.getElementById("statusText");
+          var panel = document.getElementById("messagePanel");
+          var messageText = document.getElementById("messageText");
+          if (status) status.textContent = "摄像头或模型加载失败";
+          if (messageText) messageText.textContent = message;
+          if (panel) panel.hidden = false;
+        });
+      };
+    </script>
+    <link rel="stylesheet" href="./style.css" onerror="reportCriticalLoadError('样式文件加载失败，请检查 style.css 是否与 index.html 位于同一文件夹。')" />
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" onerror="reportCriticalLoadError('Three.js CDN 加载失败，请检查网络连接后刷新页面。')"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" onerror="reportCriticalLoadError('MediaPipe Hands CDN 加载失败，请检查网络连接后刷新页面。')"></script>
+    <script defer src="./main.js" onerror="reportCriticalLoadError('main.js 加载失败，请确认项目文件完整。')"></script>
+  </head>
+  <body>
+    <main id="app" aria-label="手势控制 3D 粒子系统">
+      <canvas id="sceneCanvas" aria-label="3D 粒子画布"></canvas>
+
+      <div class="ambient ambient-one"></div>
+      <div class="ambient ambient-two"></div>
+
+      <header class="topbar glass-panel">
+        <div>
+          <p class="eyebrow">GESTURE PARTICLE LAB</p>
+          <h1>掌间星域</h1>
+        </div>
+        <div id="statusBadge" class="status-badge" data-state="loading" role="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="statusText">正在初始化</span>
+          <span class="status-divider" aria-hidden="true"></span>
+          <span id="opennessText" class="openness-text">原始开合 --</span>
+        </div>
+      </header>
+
+      <section class="instruction glass-panel" aria-label="操作提示">
+        <span class="instruction-icon">✦</span>
+        <div>
+          <strong>张开手掌，释放粒子</strong>
+          <p>移动手掌旋转星域 · 握拳收拢粒子</p>
+        </div>
+      </section>
+
+      <aside class="control-panel glass-panel" aria-label="粒子控制面板">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-kicker">PARTICLE FORM</span>
+            <h2>粒子形态</h2>
+          </div>
+          <span class="decorative-orbit">◌</span>
+        </div>
+
+        <div class="preset-list" role="group" aria-label="粒子预设">
+          <button class="preset-button active" type="button" data-preset="nebula" aria-pressed="true">
+            <span class="preset-symbol">✦</span><span>星云</span>
+          </button>
+          <button class="preset-button" type="button" data-preset="fireworks" aria-pressed="false">
+            <span class="preset-symbol">✺</span><span>烟花</span>
+          </button>
+          <button class="preset-button" type="button" data-preset="saturn" aria-pressed="false">
+            <span class="preset-symbol">◉</span><span>土星</span>
+          </button>
+          <button class="preset-button" type="button" data-preset="flower" aria-pressed="false">
+            <span class="preset-symbol">❉</span><span>花朵</span>
+          </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <label class="field-label" for="colorPicker">
+          <span>基础色彩</span>
+          <span id="colorValue" class="field-value">#7C5CFF</span>
+        </label>
+        <div class="color-row">
+          <input id="colorPicker" type="color" value="#7c5cff" aria-label="选择粒子基础颜色" />
+          <div class="color-preview" aria-hidden="true"><span></span></div>
+        </div>
+
+        <label class="field-label density-label" for="densitySlider">
+          <span>粒子密度</span>
+          <span class="density-value"><b id="densityValue">3,500</b> 粒</span>
+        </label>
+        <input id="densitySlider" type="range" min="3000" max="6000" step="500" value="3500" />
+        <div class="range-labels"><span>轻盈</span><span>绚密</span></div>
+      </aside>
+
+      <section id="cameraPanel" class="camera-panel glass-panel" aria-label="摄像头预览">
+        <video id="cameraVideo" playsinline muted aria-label="镜像摄像头画面"></video>
+        <div id="cameraPlaceholder" class="camera-placeholder">
+          <span class="camera-glyph">◉</span>
+          <span>等待摄像头</span>
+        </div>
+        <div class="camera-label"><span></span> HAND TRACKING</div>
+        <div class="resize-handle resize-n" data-edge="n" aria-hidden="true"></div>
+        <div class="resize-handle resize-e" data-edge="e" aria-hidden="true"></div>
+        <div class="resize-handle resize-ne" data-edge="ne" aria-label="拖动调整摄像头大小"></div>
+      </section>
+
+      <button id="fullscreenButton" class="fullscreen-button glass-panel" type="button" aria-label="进入全屏" title="进入全屏">
+        <span class="fullscreen-enter" aria-hidden="true">⛶</span>
+        <span id="fullscreenText">全屏</span>
+      </button>
+
+      <section id="messagePanel" class="message-panel glass-panel" role="alert" aria-live="assertive" hidden>
+        <button id="closeMessageButton" class="close-message" type="button" aria-label="关闭提示">×</button>
+        <strong>需要你的注意</strong>
+        <p id="messageText"></p>
+        <button id="retryCameraButton" class="retry-button" type="button">重新尝试摄像头</button>
+      </section>
+
+      <noscript>
+        <div class="noscript-message">此页面需要启用 JavaScript 才能运行。</div>
+      </noscript>
+    </main>
+  </body>
+</html>
